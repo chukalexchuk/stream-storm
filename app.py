@@ -14,6 +14,11 @@ kinesis_client = boto3.client('kinesis')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
+# Defining data pre-processing logic to perform analysis and optimisation of energy-reduction algorithms
+def preprocess_data(data):
+    # Logic
+    return data
+
 def put_data_to_kinesis(data, partition_key):
     try:
         response = kinesis_client.put_record(
@@ -37,12 +42,15 @@ def main():
                 while True:
                     data = jl_device.read()
                     if data is not None:
+                        # Performing data pre-processing
+                        preprocessed_data = preprocess_data(data)
+
                         # Converting data to JSON format
                         json_data = {
                             "serial_number": serial_number,
-                            "current": data['signals']['current'],
-                            "voltage": data['accumulators']['voltage'],
-                            "power": data['accumulators']['power']
+                            "current": preprocessed_data['signals']['current'],
+                            "voltage": preprocessed_data['accumulators']['voltage'],
+                            "power": preprocessed_data['accumulators']['power']
                         }
                         # Sending data to AWS Kinesis
                         put_data_to_kinesis(json_data, '1')
